@@ -1,0 +1,257 @@
+<div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a
+
+        href="https://github.com/csbun/silly-datetime"
+
+    >silly-datetime (v0.1.2)</a>
+</h1>
+<h4>simple datetime formater</h4>
+<div class="apidocSectionDiv"><a
+    href="#apidoc.tableOfContents"
+    id="apidoc.tableOfContents"
+><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.silly-datetime">module silly-datetime</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.silly-datetime.format">
+            function <span class="apidocSignatureSpan">silly-datetime.</span>format
+            <span class="apidocSignatureSpan">(datetime, formatStr)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.silly-datetime.fromNow">
+            function <span class="apidocSignatureSpan">silly-datetime.</span>fromNow
+            <span class="apidocSignatureSpan">(datetime)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.silly-datetime.locate">
+            function <span class="apidocSignatureSpan">silly-datetime.</span>locate
+            <span class="apidocSignatureSpan">(arg)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.silly-datetime" id="apidoc.module.silly-datetime">module silly-datetime</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.silly-datetime.format" id="apidoc.element.silly-datetime.format">
+        function <span class="apidocSignatureSpan">silly-datetime.</span>format
+        <span class="apidocSignatureSpan">(datetime, formatStr)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function format(datetime, formatStr) {
+  var t = getDateObject(datetime);
+  var hours = undefined,
+      o = undefined,
+      i = 0;
+  formatStr = formatStr || &#x27;YYYY-MM-DD HH:mm:ss&#x27;;
+  hours = t.getHours();
+  o = [[&#x27;M+&#x27;, t.getMonth() + 1], [&#x27;D+&#x27;, t.getDate()],
+  // H 24小时制
+  [&#x27;H+&#x27;, hours],
+  // h 12小时制
+  [&#x27;h+&#x27;, hours &#x3e; 12 ? hours - 12 : hours], [&#x27;m+&#x27;, t.getMinutes()], [&#x27;s+&#x27;, t.getSeconds()]];
+  // 替换 Y
+  if (/(Y+)/.test(formatStr)) {
+    formatStr = formatStr.replace(RegExp.$1, (t.getFullYear() + &#x27;&#x27;).substr(4 - RegExp.$1.length));
+  }
+  // 替换 M, D, H, h, m, s
+  for (; i &#x3c; o.length; i++) {
+    if (new RegExp(&#x27;(&#x27; + o[i][0] + &#x27;)&#x27;).test(formatStr)) {
+      formatStr = formatStr.replace(RegExp.$1, RegExp.$1.length === 1 ? o[i][1] : (&#x27;00&#x27; + o[i][1]).substr((&#x27;&#x27; + o[i][1]).length));
+    }
+  }
+  // 替换 a/A 为 am, pm
+  return formatStr.replace(/a/ig, hours &#x3e; 11 ? &#x27;pm&#x27; : &#x27;am&#x27;);
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+bower install silly-datetime --save
+```
+
+## Example
+
+```javascript
+var sd = require(&#x27;silly-datetime&#x27;);
+sd.<span class="apidocCodeKeywordSpan">format</span>(new Date(), &#x27;YYYY-MM-DD HH:mm&#x27;);
+// 2015-07-06 15:10
+
+sd.fromNow(+new Date() - 2000);
+// a few seconds ago
+```
+
+ES2015:
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.silly-datetime.fromNow" id="apidoc.element.silly-datetime.fromNow">
+        function <span class="apidocSignatureSpan">silly-datetime.</span>fromNow
+        <span class="apidocSignatureSpan">(datetime)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function fromNow(datetime) {
+  if (!_curentLocale) {
+    // 初始化本地化语言为 en
+    locate(&#x27;&#x27;);
+  }
+  var det = +new Date() - +getDateObject(datetime);
+  var format = undefined,
+      str = undefined,
+      i = 0,
+      detDef = undefined,
+      detDefVal = undefined;
+  if (det &#x3c; 0) {
+    format = _curentLocale.future;
+    det = -det;
+  } else {
+    format = _curentLocale.past;
+  }
+  for (; i &#x3c; DET_STD.length; i++) {
+    detDef = DET_STD[i];
+    detDefVal = detDef[1];
+    if (det &#x3e;= detDefVal) {
+      str = _curentLocale[detDef[0]].replace(&#x27;%s&#x27;, parseInt(det / detDefVal, 0) || 1);
+      break;
+    }
+  }
+  return format.replace(&#x27;%s&#x27;, str);
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+## Example
+
+```javascript
+var sd = require(&#x27;silly-datetime&#x27;);
+sd.format(new Date(), &#x27;YYYY-MM-DD HH:mm&#x27;);
+// 2015-07-06 15:10
+
+sd.<span class="apidocCodeKeywordSpan">fromNow</span>(+new Date() - 2000);
+// a few seconds ago
+```
+
+ES2015:
+
+```javascript
+import {
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.silly-datetime.locate" id="apidoc.element.silly-datetime.locate">
+        function <span class="apidocSignatureSpan">silly-datetime.</span>locate
+        <span class="apidocSignatureSpan">(arg)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function locate(arg) {
+  var newLocale = undefined,
+      prop = undefined;
+  if (typeof arg === &#x27;string&#x27;) {
+    newLocale = arg === &#x27;zh-cn&#x27; ? LOCALE_ZH_CN : LOCALE_EN;
+  } else {
+    newLocale = arg;
+  }
+  if (!_curentLocale) {
+    _curentLocale = {};
+  }
+  for (prop in newLocale) {
+    if (newLocale.hasOwnProperty(prop) &#x26;&#x26; typeof newLocale[prop] === &#x27;string&#x27;) {
+      _curentLocale[prop] = newLocale[prop];
+    }
+  }
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+- datetime: Date Object
+
+```javascript
+sd.fromNow(+new Date() - 2000);
+// a few seconds ago
+```
+
+### .<span class="apidocCodeKeywordSpan">locate</span>(newLocale)
+
+Changing locale globally. By default, silly-datetime comes with English locale strings.
+
+- newLocale: locate string or locate Object
+
+Locate string can be `en` (default) or `zh-cn`;
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
